@@ -12,6 +12,7 @@ public class BookingSteps {
     @Step
     public void openBookingPage() {
         bookingPage.openAt(Session.getBaseUrl());
+        bookingPage.getDriver().manage().window().maximize();
     }
 
     @Step
