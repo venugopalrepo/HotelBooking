@@ -5,7 +5,9 @@ import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import testing.models.BookingEntry;
 
 import java.text.ParseException;
@@ -56,19 +58,20 @@ public class BookingPage extends PageObjectsEnhanced {
         isDeposit.selectByVisibleText(String.valueOf(BookingEntry.getIsDeposit()));
     }
 
-    public void submitsBooking() {
+    public void submitsBooking() throws InterruptedException {
         int beforeCount = getDriver().findElements(By.xpath(recordsPath)).size();
         saveButton.click();
         waitUntilNewRecordAdded(beforeCount);
     }
 
-    public void waitUntilNewRecordAdded(int beforeCount) {
-        int afterCount = 0;
-        for (int i = 0; afterCount <= beforeCount; i++)
-            afterCount = getDriver().findElements(By.xpath(recordsPath)).size();
+    public void waitUntilNewRecordAdded(int beforeCount) throws InterruptedException {
+        String newRecordXpath = "//div[@class='row'][" + beforeCount + "]/div/p";
+        WebDriverWait wait=new WebDriverWait(this.getDriver(), 30);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(newRecordXpath)));
     }
 
     public void verifyBookingDetailsAsEntered() {
+
         int matchRow = getMatchedRecordFromOutput();
 
         List<WebElement> rowContents = getDriver().findElements(By.xpath("//div[@class='row'][" + matchRow + "]/div/p"));
@@ -95,10 +98,17 @@ public class BookingPage extends PageObjectsEnhanced {
         return matchRow;
     }
 
-    public void deleteBooking() {
+    public void deleteBooking() throws InterruptedException {
         int matchRow = getMatchedRecordFromOutput();
         WebElement deleteButton = getDriver().findElement(By.xpath("//div[@class='row'][" + matchRow + "]//input"));
         deleteButton.click();
+        waitUntilRecordDeleted(matchRow);
+    }
+
+    public void waitUntilRecordDeleted(int matchRow) throws InterruptedException {
+        String newRecordXpath = "//div[@class='row'][" + matchRow + "]";
+        WebDriverWait wait=new WebDriverWait(this.getDriver(), 30);
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(newRecordXpath)));
     }
 
     public void verifyBookingIsDeleted() {
